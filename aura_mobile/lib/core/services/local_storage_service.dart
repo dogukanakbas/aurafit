@@ -74,4 +74,48 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currentCoachKey, json.encode(coach));
   }
+
+  static const String _notificationsKey = 'aura_persistent_notifications_v1';
+
+  static Future<List<Map<String, dynamic>>> getNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString(_notificationsKey);
+    if (jsonStr != null && jsonStr.isNotEmpty) {
+      final List<dynamic> decoded = json.decode(jsonStr);
+      return decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+    return [
+      {
+        'id': 'notif_1',
+        'title': 'Su Hatırlatması 💧',
+        'body': 'Koçunuz Atlas Demir günlük 3.0 litre su hedefinizi hatırlatıyor.',
+        'time': '14:30',
+        'type': 'SU',
+        'targetStudent': 'ALL',
+      },
+      {
+        'id': 'notif_2',
+        'title': 'Yeni Antrenman Programı 💪',
+        'body': '3. Hafta Hipertrofi ve Güç programınız sisteme tanımlandı.',
+        'time': 'Dün',
+        'type': 'PROGRAM',
+        'targetStudent': 'ALL',
+      },
+      {
+        'id': 'notif_3',
+        'title': 'Haftalık Check-In Ölçüleri 📏',
+        'body': 'Pazar günü kilo ve gelişim fotoğraflarınızı sisteme girmeyi unutmayın.',
+        'time': '2 gün önce',
+        'type': 'UYARI',
+        'targetStudent': 'ALL',
+      },
+    ];
+  }
+
+  static Future<void> addNotification(Map<String, dynamic> notif) async {
+    final list = await getNotifications();
+    list.insert(0, notif);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_notificationsKey, json.encode(list));
+  }
 }

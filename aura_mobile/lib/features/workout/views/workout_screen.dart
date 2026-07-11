@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/premium_button.dart';
 
@@ -14,44 +13,128 @@ class WorkoutScreen extends StatefulWidget {
 }
 
 class _WorkoutScreenState extends State<WorkoutScreen> {
+  static const String _cacheKey = 'aura_cached_workout_accordion_v1';
   bool _isLoading = true;
   bool _isOfflineMode = false;
-  List<Map<String, dynamic>> _exercises = [];
   final Set<String> _completedSets = {};
 
-  static const String _cacheKey = 'cached_workout_plan_v2';
-
-  // Varsayılan Zengin Egzersiz JSON Verisi
-  final List<Map<String, dynamic>> _defaultExercises = [
+  final List<Map<String, dynamic>> _workoutDays = [
     {
-      'id': 'ex_1',
-      'title': 'Barbell Bench Press',
-      'targetMuscle': 'Göğüs & Ön Omuz',
-      'sets': 4,
-      'reps': '8 - 10 Tekrar',
-      'rest': '90 sn',
-      'tip': 'Barı göğüs ucuna kontrollü indir, dirsekleri %45 açıda tut.',
-      'videoUrl': 'https://www.youtube.com/watch?v=gRVjAtPip0Y',
+      'dayId': 'day_1',
+      'dayTitle': '1. GÜN • GÖĞÜS & ÖN KOL (PAZARTESİ)',
+      'subtitle': '3 Egzersiz • Tahmini 45 Dk',
+      'icon': Icons.fitness_center_rounded,
+      'isInitiallyExpanded': true,
+      'exercises': [
+        {
+          'id': 'd1_ex_1',
+          'title': 'Barbell Bench Press',
+          'targetMuscle': 'Ana Göğüs',
+          'sets': 4,
+          'reps': '8 - 10 Tekrar',
+          'rest': '90 sn',
+          'tip': 'Barı göğüs ucuna kontrollü indir, dirsekleri %45 açıda tut.',
+          'videoUrl': 'https://www.youtube.com/watch?v=gRVjAtPip0Y',
+        },
+        {
+          'id': 'd1_ex_2',
+          'title': 'Incline Dumbbell Press',
+          'targetMuscle': 'Üst Göğüs',
+          'sets': 3,
+          'reps': '10 - 12 Tekrar',
+          'rest': '60 sn',
+          'tip': 'Sehpa açısını 30 dereceye ayarla, tepe noktada göğsü sık.',
+          'videoUrl': 'https://www.youtube.com/watch?v=SrqOu55lrYU',
+        },
+        {
+          'id': 'd1_ex_3',
+          'title': 'EZ Barbell Curl',
+          'targetMuscle': 'Ön Kol (Biceps)',
+          'sets': 3,
+          'reps': '12 Tekrar',
+          'rest': '45 sn',
+          'tip': 'Dirsekleri gövdeye sabitle, belden vurma yapmadan kaldır.',
+          'videoUrl': 'https://www.youtube.com/watch?v=Iwe6AmxVf7o',
+        },
+      ],
     },
     {
-      'id': 'ex_2',
-      'title': 'Incline Dumbbell Press',
-      'targetMuscle': 'Üst Göğüs',
-      'sets': 3,
-      'reps': '10 - 12 Tekrar',
-      'rest': '60 sn',
-      'tip': 'Sehpa açısını 30 dereceye ayarla, tepe noktada göğsü sık.',
-      'videoUrl': 'https://www.youtube.com/watch?v=SrqOu55lrYU',
+      'dayId': 'day_2',
+      'dayTitle': '2. GÜN • SIRT & ARKA KOL (ÇARŞAMBA)',
+      'subtitle': '3 Egzersiz • Tahmini 50 Dk',
+      'icon': Icons.shield_rounded,
+      'isInitiallyExpanded': false,
+      'exercises': [
+        {
+          'id': 'd2_ex_1',
+          'title': 'Lat Pulldown (Geniş Tutuş)',
+          'targetMuscle': 'Kanat (Latissimus)',
+          'sets': 4,
+          'reps': '10 Tekrar',
+          'rest': '60 sn',
+          'tip': 'Barı göğsünün üstüne çekerken kürek kemiklerini sıkıştır.',
+          'videoUrl': 'https://www.youtube.com/watch?v=CAwf7n6Luuc',
+        },
+        {
+          'id': 'd2_ex_2',
+          'title': 'Bent-Over Barbell Row',
+          'targetMuscle': 'Orta Sırt',
+          'sets': 4,
+          'reps': '8 - 10 Tekrar',
+          'rest': '75 sn',
+          'tip': 'Sırtı düz tutarak barı karın boşluğuna doğru çek.',
+          'videoUrl': 'https://www.youtube.com/watch?v=G8l_8chR5BE',
+        },
+        {
+          'id': 'd2_ex_3',
+          'title': 'Rope Triceps Pushdown',
+          'targetMuscle': 'Arka Kol (Triceps)',
+          'sets': 3,
+          'reps': '12 - 15 Tekrar',
+          'rest': '45 sn',
+          'tip': 'Halatı aşağı bastırırken ellerini dışa doğru aç.',
+          'videoUrl': 'https://www.youtube.com/watch?v=vB5OHsJ3EME',
+        },
+      ],
     },
     {
-      'id': 'ex_3',
-      'title': 'Cable Flyes (High to Low)',
-      'targetMuscle': 'Alt Göğüs İzole',
-      'sets': 3,
-      'reps': '12 - 15 Tekrar',
-      'rest': '45 sn',
-      'tip': 'Kabloları birleştirirken 1 saniye izometrik kasılma uygula.',
-      'videoUrl': 'https://www.youtube.com/watch?v=Iwe6AmxVf7o',
+      'dayId': 'day_3',
+      'dayTitle': '3. GÜN • BACAK & OMUZ (CUMA)',
+      'subtitle': '3 Egzersiz • Tahmini 55 Dk',
+      'icon': Icons.bolt_rounded,
+      'isInitiallyExpanded': false,
+      'exercises': [
+        {
+          'id': 'd3_ex_1',
+          'title': 'Barbell Back Squat',
+          'targetMuscle': 'Ön Bacak & Kalça',
+          'sets': 4,
+          'reps': '8 Tekrar',
+          'rest': '120 sn',
+          'tip': 'Dizler ayak parmak yönünü takip etmeli, derin çök.',
+          'videoUrl': 'https://www.youtube.com/watch?v=bEv6CCg2BC8',
+        },
+        {
+          'id': 'd3_ex_2',
+          'title': 'Seated Dumbbell Shoulder Press',
+          'targetMuscle': 'Ön & Yan Omuz',
+          'sets': 3,
+          'reps': '10 Tekrar',
+          'rest': '60 sn',
+          'tip': 'Dambılları kulak hizasına kadar indir ve yukarı presle.',
+          'videoUrl': 'https://www.youtube.com/watch?v=qEwKCR5JCog',
+        },
+        {
+          'id': 'd3_ex_3',
+          'title': 'Dumbbell Lateral Raise',
+          'targetMuscle': 'Yan Omuz',
+          'sets': 4,
+          'reps': '15 Tekrar',
+          'rest': '45 sn',
+          'tip': 'Dirsekler hafif bükülü, omuz hizasına kadar yana aç.',
+          'videoUrl': 'https://www.youtube.com/watch?v=3VcKaXpzqRo',
+        },
+      ],
     },
   ];
 
@@ -61,46 +144,26 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _loadWorkoutData();
   }
 
-  /// 1. JSON tabanlı Workout verisini shared_preferences ile önbelleğe alan fonksiyon
   Future<void> _loadWorkoutData() async {
     setState(() => _isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Çevrimiçi ağ senaryosunu simüle edip yerel önbelleğe (SharedPreferences) kaydet
-      final jsonString = jsonEncode(_defaultExercises);
-      await prefs.setString(_cacheKey, jsonString);
-
+      await prefs.setString(_cacheKey, jsonEncode(_workoutDays));
       setState(() {
-        _exercises = _defaultExercises;
         _isOfflineMode = false;
         _isLoading = false;
       });
     } catch (e) {
-      // Çevrimdışı (Offline) durum: SharedPreferences önbelleğinden getir
-      final prefs = await SharedPreferences.getInstance();
-      final cachedJson = prefs.getString(_cacheKey);
-      if (cachedJson != null) {
-        final decoded = List<Map<String, dynamic>>.from(jsonDecode(cachedJson));
-        setState(() {
-          _exercises = decoded;
-          _isOfflineMode = true;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _exercises = _defaultExercises;
-          _isOfflineMode = true;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isOfflineMode = true;
+        _isLoading = false;
+      });
     }
   }
 
-  /// 2. Set onaylandığında mediumImpact titremesi ve set durumunu değiştirme
-  void _toggleSet(String exerciseId, int setIndex) {
+  void _toggleSet(String exerciseId, int setNum) {
     HapticFeedback.mediumImpact();
-    final key = '${exerciseId}_set_$setIndex';
+    final key = '${exerciseId}_set_$setNum';
     setState(() {
       if (_completedSets.contains(key)) {
         _completedSets.remove(key);
@@ -108,175 +171,119 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         _completedSets.add(key);
       }
     });
-
-    // Eğer tüm setler tamamlandıysa otomatik kutlama kontrolü
-    final totalSets = _exercises.fold<int>(0, (sum, e) => sum + (e['sets'] as int));
-    if (_completedSets.length == totalSets) {
-      _triggerCelebrationAnimation();
-    }
   }
 
-  /// "Doğru Form Videosu İzle" modalı
   void _showVideoGuideModal(Map<String, dynamic> exercise) {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 48,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColors.lightSurface,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(32), topRight: Radius.circular(32)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
                   decoration: BoxDecoration(
-                    color: AppColors.emeraldGreen.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.play_circle_fill_rounded,
-                      color: AppColors.emeraldGreen, size: 28),
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10)),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        exercise['title'],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        'Doğru Biyomekanik Form Rehberi',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.lightBackground,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.grey.shade200),
               ),
-              child: Row(
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.lightbulb_outline_rounded,
-                      color: AppColors.emeraldGreen, size: 22),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      exercise['tip'],
+                      '${exercise['title']} • Doğru Form Guide',
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.obsidianBlack),
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            PremiumButton(
-              onPressed: () => Navigator.pop(context),
-              label: 'ANLADIM, ANTRENMANA DÖN',
-              isPrimary: true,
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 3. Antrenman bittiğinde ekranı kaplayan "Tebrikler" Lottie animasyonu
-  void _triggerCelebrationAnimation() {
-    HapticFeedback.heavyImpact();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 160,
-                height: 160,
-                child: Lottie.asset(
-                  'assets/lottie/celebration.json',
-                  repeat: true,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.emoji_events_rounded,
-                          size: 100, color: AppColors.warning),
-                ),
-              ),
               const SizedBox(height: 16),
-              const Text(
-                'TEBRİKLER ŞAMPİYON! 🏆',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.obsidianBlack,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.network(
+                      'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
+                      height: 220,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                    Container(
+                      height: 220,
+                      color: Colors.black.withValues(alpha: 0.45),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.emeraldGreen,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.emeraldGreen
+                                .withValues(alpha: 0.4),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.play_arrow_rounded,
+                          color: Colors.white, size: 36),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               Text(
-                'Bugünkü tüm egzersiz setlerini başarıyla tamamladın ve aktivite halkalarını doldurdun.',
+                'KOÇUN TAVSİYESİ:',
                 style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 14,
-                  height: 1.4,
+                  color: AppColors.emeraldGreen,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.1,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 6),
+              Text(
+                exercise['tip'],
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.obsidianBlack,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4),
+              ),
+              const Spacer(),
               PremiumButton(
                 onPressed: () => Navigator.pop(context),
-                label: 'HARİKA!',
+                label: 'ANLADIM, ANTRENMANA DÖN',
                 isPrimary: true,
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -299,54 +306,42 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'ANTRENMAN PROGRAMI',
+              'ANTRENMAN PROGRAMLARIM',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w900,
                 color: AppColors.obsidianBlack,
               ),
             ),
-            if (_isOfflineMode)
-              Row(
-                children: const [
-                  Icon(Icons.offline_bolt_rounded,
-                      color: AppColors.warning, size: 14),
-                  SizedBox(width: 4),
-                  Text(
-                    'Çevrimdışı Mod - Önbellek Aktif',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.warning,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ],
+            Text(
+              'Açılır menülerden gününüzü seçin ve antrenmana başlayın',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMuted,
               ),
+            ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.cloud_done_rounded,
-                color: AppColors.emeraldGreen),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Antrenman verileri önbellekte güvende ✅')),
-              );
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            ..._exercises.map((exercise) => _buildExerciseCard(exercise)),
-            const SizedBox(height: 24),
+            ..._workoutDays.map((day) => _buildExpandableDayAccordion(day)),
+            const SizedBox(height: 16),
             PremiumButton(
-              onPressed: _triggerCelebrationAnimation,
-              label: 'ANTRENMANI TAMAMLA & KUTLA',
+              onPressed: () {
+                HapticFeedback.heavyImpact();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tebrikler! Günlük antrenman programın başarıyla tamamlandı 🏆'),
+                    backgroundColor: AppColors.emeraldGreen,
+                  ),
+                );
+              },
+              label: 'ANTRENMAN GÜNÜNÜ TAMAMLA',
               icon: Icons.emoji_events_rounded,
               isPrimary: true,
             ),
@@ -357,23 +352,71 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
   }
 
-  Widget _buildExerciseCard(Map<String, dynamic> exercise) {
-    final int setsCount = exercise['sets'];
+  Widget _buildExpandableDayAccordion(Map<String, dynamic> day) {
+    final List<Map<String, dynamic>> exercises =
+        List<Map<String, dynamic>>.from(day['exercises']);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.shade200, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: day['isInitiallyExpanded'] == true,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.emeraldGreen.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(day['icon'] ?? Icons.fitness_center_rounded,
+                color: AppColors.emeraldGreen, size: 22),
+          ),
+          title: Text(
+            day['dayTitle'],
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: AppColors.obsidianBlack,
+            ),
+          ),
+          subtitle: Text(
+            day['subtitle'],
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+          children: exercises.map((ex) => _buildExerciseCard(ex)).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExerciseCard(Map<String, dynamic> exercise) {
+    final int setsCount = exercise['sets'];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBackground,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,16 +432,15 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       exercise['targetMuscle'].toString().toUpperCase(),
                       style: const TextStyle(
                         color: AppColors.emeraldGreen,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       exercise['title'],
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: AppColors.obsidianBlack,
                       ),
@@ -406,36 +448,33 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   ],
                 ),
               ),
-              // "Doğru Form Videosu İzle" Butonu
               TextButton.icon(
                 onPressed: () => _showVideoGuideModal(exercise),
                 icon: const Icon(Icons.play_circle_fill_rounded,
-                    color: AppColors.emeraldGreen, size: 20),
+                    color: AppColors.emeraldGreen, size: 18),
                 label: const Text(
                   'Form Video',
                   style: TextStyle(
                     color: AppColors.emeraldGreen,
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             exercise['tip'],
-            style: TextStyle(
-              fontSize: 13,
+            style: const TextStyle(
+              fontSize: 12,
               color: AppColors.textMuted,
               fontStyle: FontStyle.italic,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           const Divider(height: 1),
-          const SizedBox(height: 16),
-
-          // Her Bir Set İçin Titreşimli Onay Checkbox'ları (HapticFeedback.mediumImpact)
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -448,38 +487,39 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 onTap: () => _toggleSet(exercise['id'], setNum),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: isDone
                         ? AppColors.emeraldGreen
-                        : AppColors.lightBackground,
-                    borderRadius: BorderRadius.circular(16),
+                        : AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isDone
                           ? AppColors.emeraldGreen
-                          : Colors.grey.shade300,
-                      width: 1.5,
+                          : Colors.grey.shade400,
                     ),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         isDone
                             ? Icons.check_circle_rounded
                             : Icons.circle_outlined,
-                        color: isDone ? Colors.white : AppColors.textMuted,
-                        size: 18,
+                        size: 15,
+                        color:
+                            isDone ? Colors.white : AppColors.obsidianBlack,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                       Text(
-                        'Set $setNum',
+                        '$setNum. SET',
                         style: TextStyle(
-                          color:
-                              isDone ? Colors.white : AppColors.obsidianBlack,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: isDone
+                              ? Colors.white
+                              : AppColors.obsidianBlack,
                         ),
                       ),
                     ],

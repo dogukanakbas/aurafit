@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/premium_button.dart';
 import '../../auth/views/auth_screen.dart';
+import 'trainer_notification_broadcast_screen.dart';
+import '../../notifications/views/notifications_screen.dart';
 
 class TrainerDashboardScreen extends StatefulWidget {
   const TrainerDashboardScreen({super.key});
@@ -453,6 +454,32 @@ class _TrainerDashboardScreenState extends State<TrainerDashboardScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Danışanlara Bildirim Gönder',
+            icon: const Icon(Icons.campaign_rounded, color: AppColors.emeraldGreen),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const TrainerNotificationBroadcastScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: 'Gelen Bildirimler',
+            icon: const Icon(Icons.notifications_active_rounded, color: AppColors.emeraldGreen),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout_rounded, color: AppColors.warning),
             onPressed: _logout,
