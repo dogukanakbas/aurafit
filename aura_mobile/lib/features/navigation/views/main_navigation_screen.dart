@@ -7,6 +7,7 @@ import '../../chat/views/coach_chat_screen.dart';
 import '../../nutrition/views/nutrition_screen.dart';
 import '../../market/views/market_screen.dart';
 import '../../profile/views/profile_screen.dart';
+import 'turnstile_qr_modal.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -65,13 +66,46 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(0, Icons.home_rounded, 'Ana Sayfa'),
               _buildNavItem(1, Icons.fitness_center_rounded, 'Antrenman'),
               _buildNavItem(2, Icons.chat_bubble_rounded, 'Koçum'),
+
+              // MACFit Tarzı Merkez Turnike / QR Kodu Butonu
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const TurnstileQrModal(),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.obsidianBlack,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.obsidianBlack.withValues(alpha: 0.35),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.qr_code_2_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+
               _buildNavItem(3, Icons.restaurant_menu_rounded, 'Beslenme'),
               _buildNavItem(4, Icons.storefront_rounded, 'Market'),
               _buildNavItem(5, Icons.person_rounded, 'Profil'),

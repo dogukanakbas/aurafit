@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../notifications/views/notifications_screen.dart';
+import '../../workout/views/body_map_target_screen.dart';
+import '../../workout/views/workout_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -183,6 +185,18 @@ class _HomeScreenState extends State<HomeScreen>
                 ],
               ),
               const SizedBox(height: 20),
+
+              // 1. MACFit Tarzı Haftalık Seri Barı & Oyunlaştırma Metrikleri
+              _buildMacfitWeeklyStreakAndGamificationBar(),
+              const SizedBox(height: 24),
+
+              // 2. MACFit Tarzı: NEREDE SPOR YAPMAK İSTERSİN? (KULÜPTE • EVDE • DIŞARIDA)
+              _buildMacfitWhereToWorkoutSection(),
+              const SizedBox(height: 24),
+
+              // 3. MACFit Tarzı: ODAK BÖLGELERİN NERESİ? (İnteraktif Vücut Haritası)
+              _buildMacfitInteractiveBodyMapCard(),
+              const SizedBox(height: 24),
 
               // YENİ: HABERLER, KAMPANYALAR VE MARKET SLIDER (CAROUSEL)
               _buildTopNewsAndMarketSlider(),
@@ -980,6 +994,377 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ),
       ],
+    );
+  }
+
+  // ==========================================
+  // MACFIT TARZI 1: HAFTALIK SERİ TAKVİMİ & OYUNLAŞTIRMA SATIRI
+  // ==========================================
+  Widget _buildMacfitWeeklyStreakAndGamificationBar() {
+    final days = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
+    final activeDayIndex = 5; // Örn: Cumartesi (C)
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Haftalık Günler Barı
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.lightSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(days.length, (index) {
+              final isToday = index == activeDayIndex;
+              final isCompleted = index < activeDayIndex;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isToday
+                      ? AppColors.obsidianBlack.withValues(alpha: 0.08)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      days[index],
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isToday ? FontWeight.w900 : FontWeight.w700,
+                        color: isToday
+                            ? AppColors.obsidianBlack
+                            : AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted || isToday
+                            ? AppColors.emeraldGreen
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: isCompleted || isToday
+                              ? AppColors.emeraldGreen
+                              : Colors.grey.shade400,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // 3'lü Oyunlaştırma & İstatistik Satırı
+        Row(
+          children: [
+            Expanded(
+              child: _buildMacfitStatCard(
+                title: 'HAFTALIK SERİ',
+                value: '5 GÜN 🔥',
+                subtitle: 'Seri Devam Ediyor',
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildMacfitStatCard(
+                title: 'GÖREVLER',
+                value: '1 / 2 🏅',
+                subtitle: 'YENİ • Rookie',
+                isBadge: true,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildMacfitStatCard(
+                title: 'LİDERLİK',
+                value: '#12 👑',
+                subtitle: 'Elit Lig',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMacfitStatCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    bool isBadge = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (isBadge)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'YENİ',
+                    style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+              color: AppColors.obsidianBlack,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.emeraldGreen,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // MACFIT TARZI 2: NEREDE SPOR YAPMAK İSTERSİN?
+  // ==========================================
+  Widget _buildMacfitWhereToWorkoutSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'NEREDE SPOR YAPMAK İSTERSİN?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: AppColors.obsidianBlack,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildLocationCard(
+                title: 'KULÜPTE',
+                imageUrl:
+                    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WorkoutScreen()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildLocationCard(
+                title: 'EVDE',
+                imageUrl:
+                    'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WorkoutScreen()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildLocationCard(
+                title: 'DIŞARIDA',
+                imageUrl:
+                    'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=400&q=80',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WorkoutScreen()),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationCard({
+    required String title,
+    required String imageUrl,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Image.network(
+              imageUrl,
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            Container(
+              height: 150,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.85),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // MACFIT TARZI 3: ODAK BÖLGELERİN NERESİ? KARTI
+  // ==========================================
+  Widget _buildMacfitInteractiveBodyMapCard() {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const BodyMapTargetScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.obsidianBlack,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.obsidianBlack.withValues(alpha: 0.25),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.emeraldGreen.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.accessibility_new_rounded,
+                color: AppColors.emeraldGreen,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'ODAK BÖLGELERİN NERESİ?',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'İnteraktif anatomik vücut haritasından hedef kas bölgesini seç, sana özel programları keşfet.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.75),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppColors.emeraldGreen,
+              size: 18,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
