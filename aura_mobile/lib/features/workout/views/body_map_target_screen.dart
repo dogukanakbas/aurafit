@@ -101,7 +101,7 @@ class _BodyMapTargetScreenState extends State<BodyMapTargetScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'ODAK BÖLGELERİN NERESİ?',
+          'AURA HEDEF KAS ANALİZİ',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w900,

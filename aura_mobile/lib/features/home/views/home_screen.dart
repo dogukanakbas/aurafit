@@ -1174,14 +1174,14 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ==========================================
-  // MACFIT TARZI 2: NEREDE SPOR YAPMAK İSTERSİN?
+  // AURA ÖZGÜN 2: AURA TRAINING MODLARI
   // ==========================================
   Widget _buildMacfitWhereToWorkoutSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'NEREDE SPOR YAPMAK İSTERSİN?',
+          'AURA TRAINING MODLARI',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w900,
@@ -1194,7 +1194,7 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(
               child: _buildLocationCard(
-                title: 'KULÜPTE',
+                title: 'STUDIO PRO',
                 imageUrl:
                     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80',
                 onTap: () {
@@ -1209,7 +1209,7 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 10),
             Expanded(
               child: _buildLocationCard(
-                title: 'EVDE',
+                title: 'HOME FIT',
                 imageUrl:
                     'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80',
                 onTap: () {
@@ -1224,7 +1224,7 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 10),
             Expanded(
               child: _buildLocationCard(
-                title: 'DIŞARIDA',
+                title: 'OUTDOOR RUN',
                 imageUrl:
                     'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=400&q=80',
                 onTap: () {
@@ -1279,7 +1279,7 @@ class _HomeScreenState extends State<HomeScreen>
                 title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.8,
                 ),
@@ -1292,7 +1292,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // ==========================================
-  // MACFIT TARZI 3: ODAK BÖLGELERİN NERESİ? KARTI
+  // AURA ÖZGÜN 3: AURA HEDEF KAS ANALİZİ KARTI
   // ==========================================
   Widget _buildMacfitInteractiveBodyMapCard() {
     return GestureDetector(
@@ -1336,7 +1336,7 @@ class _HomeScreenState extends State<HomeScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ODAK BÖLGELERİN NERESİ?',
+                    'AURA HEDEF KAS ANALİZİ',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
@@ -1346,7 +1346,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'İnteraktif anatomik vücut haritasından hedef kas bölgesini seç, sana özel programları keşfet.',
+                    'İnteraktif anatomik vücut haritasından odak kas grubunu seç, yapay zeka destekli koç programını başlat.',
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.75),

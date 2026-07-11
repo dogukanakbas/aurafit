@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/premium_button.dart';
 import '../../auth/views/auth_screen.dart';
 import 'trainer_notification_broadcast_screen.dart';
 import '../../notifications/views/notifications_screen.dart';

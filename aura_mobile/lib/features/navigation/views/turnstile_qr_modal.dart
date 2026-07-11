@@ -64,7 +64,7 @@ class _TurnstileQrModalState extends State<TurnstileQrModal>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'KULÜP & TURNİKE GİRİŞ KARTIN',
+                      'AURA PRO TURNİKE KARTI',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
