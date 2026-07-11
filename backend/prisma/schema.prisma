@@ -1,0 +1,223 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. User Modeli (Roller: STUDENT, COACH, ADMIN / CLIENT, TRAINER, ADMIN uyumlu)
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  password        String   // bcrypt ile hashlenmiş şifre
+  role            String   @default("STUDENT") // "STUDENT", "COACH", "ADMIN", ("CLIENT", "TRAINER")
+  isActive        Boolean  @default(true)
+  fullName        String
+
+  // B2B2C Profilleri
+  coachProfile    CoachProfile?
+  studentProfile  StudentProfile?
+
+  // İlişkiler (Geriye Dönük Uyumluluk ve B2B2C SaaS)
+  measurements    Measurement[]
+  progressPhotos  ProgressPhoto[]
+  sentMessages    Message[]         @relation("SentMessages")
+  recvMessages    Message[]         @relation("ReceivedMessages")
+  notifications   Notification[]
+  consents        ContractConsent[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// 2. CoachProfile (Antrenör SaaS Özelleştirmeleri, Paket Tipi, Komisyon ve Davet Sistemi)
+model CoachProfile {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  packageType         String    @default("BASIC") // "BASIC", "PRO", "PREMIUM"
+  phone               String?
+  iban                String?
+  status              String    @default("PENDING_APPROVAL") // "PENDING_APPROVAL", "ACTIVE"
+  subscriptionEndDate DateTime?
+  commissionRate      Float     @default(15.0) // Örn. %15
+  fixedMonthlyFee     Float?
+
+  // Davet & Referans Sistemi
+  referralCode        String?   @unique
+  referredByCoachId   String?
+  referredByCoach     CoachProfile?  @relation("CoachReferral", fields: [referredByCoachId], references: [id])
+  referredCoaches     CoachProfile[] @relation("CoachReferral")
+
+  // Premium Koçlar İçin White-Label Özelleştirme
+  customAppName       String?
+  customLogoUrl       String?
+  primaryColor        String?   // Örn: "#65A30D"
+
+  // Koçun Öğrencileri ve Oluşturduğu Şablonlar / Programlar
+  students            StudentProfile[]
+  workouts            Workout[]
+  diets               Diet[]
+  payments            Payment[]
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// 3. StudentProfile (Danışan / Öğrenci Profili)
+model StudentProfile {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  coachId             String?
+  coach               CoachProfile? @relation(fields: [coachId], references: [id])
+
+  subscriptionEndDate DateTime?
+  activeStatus        Boolean   @default(true)
+
+  // Demografik ve Biyometrik Bilgiler
+  gender              String?
+  age                 Int?
+  height              Float?
+  weight              Float?
+  goal                String?
+  experienceLevel     String?
+
+  workouts            Workout[]
+  diets               Diet[]
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+// 4. Workout Modeli (Şablon Bayraklı Antrenman Programı)
+model Workout {
+  id              String   @id @default(uuid())
+  coachId         String?
+  coach           CoachProfile? @relation(fields: [coachId], references: [id])
+  studentId       String?
+  student         StudentProfile? @relation(fields: [studentId], references: [id])
+
+  isTemplate      Boolean  @default(false) // Hazır şablon olup olmadığını belirten bayrak
+  dayNumber       Int
+  title           String
+  exerciseDetails String   // Egzersiz mikroskopisi (JSON)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// 5. Diet Modeli (Şablon Bayraklı Beslenme Programı)
+model Diet {
+  id              String   @id @default(uuid())
+  coachId         String?
+  coach           CoachProfile? @relation(fields: [coachId], references: [id])
+  studentId       String?
+  student         StudentProfile? @relation(fields: [studentId], references: [id])
+
+  isTemplate      Boolean  @default(false) // Hazır şablon olup olmadığını belirten bayrak
+  dailyCalories   Int
+  proteinGrams    Int
+  carbGrams       Int
+  fatGrams        Int
+  mealDetails     String   // Öğün detayları (JSON)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// 6. Measurement Modeli (Vücut Ölçümleri)
+model Measurement {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  weight           Float?   // kg
+  waist            Float?   // cm
+  chest            Float?   // cm
+  arm              Float?   // cm
+  leg              Float?   // cm
+  hip              Float?   // cm
+  fatRatio         Float?   // %
+  muscleRatio      Float?   // %
+  restingHeartRate Int?     // bpm
+  glucoseLevel     Float?
+  bloodPressure    String?
+
+  date             DateTime @default(now())
+}
+
+// 7. ProgressPhoto Modeli (Tarih Bazlı Gelişim Fotoğrafları)
+model ProgressPhoto {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  photoUrl  String
+  label     String   // "BEFORE", "AFTER", "ÖN", "YAN", "ARKA"
+  date      DateTime @default(now())
+}
+
+// 8. Payment Modeli (Ödemeler ve Komisyon Takibi)
+model Payment {
+  id              String        @id @default(uuid())
+  coachId         String
+  coach           CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  amount          Float
+  type            String        // "SUBSCRIPTION", "COMMISSION"
+  status          String        @default("PENDING") // "PAID", "PENDING"
+  date            DateTime      @default(now())
+}
+
+// 9. ContractConsent Modeli (KVKK, Hizmet Sözleşmesi ve Denetim İzi)
+model ContractConsent {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documentType String   // "KVKK", "HIZMET_SOZLESMESI", "BİYOMETRİK_ONAY"
+  ipAddress    String?
+  date         DateTime @default(now())
+}
+
+// 10. Message Modeli (Birebir İletişim)
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  messageType String   @default("TEXT") // "TEXT", "IMAGE", "VIDEO", "AUDIO", "DOCUMENT"
+  content     String
+  createdAt   DateTime @default(now())
+}
+
+// 11. Notification Modeli (Sistem Bildirimleri: Örn. "Su içmeyi unutma")
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String   // Örn: "Su Hatırlatıcısı 💧"
+  body        String   // Örn: "Günün 2. litresini içmeyi unutma!"
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// 12. MarketItem Modeli (Gelecek Aşama İçin: Ürün/Pazar Yeri & Komisyon)
+model MarketItem {
+  id                  String   @id @default(uuid())
+  name                String
+  category            String
+  price               Float
+  coachCommissionRate Float    @default(10.0) // Koç tavsiye komisyon oranı
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
